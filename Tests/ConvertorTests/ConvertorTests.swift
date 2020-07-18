@@ -10,7 +10,8 @@ final class ConvertorTests: XCTestCase {
     
     private lazy var convertor = Convertor(delegate: self)
     private var activeConversions: [String:Convertor.OutputFormat] = [:]
-    private lazy var expectation = XCTestExpectation()
+    private lazy var conversionExpectation = XCTestExpectation()
+    private lazy var progressExpectation = XCTestExpectation()
     
     // MARK: Life cycle
     
@@ -32,7 +33,7 @@ final class ConvertorTests: XCTestCase {
         try! self.convertor.convert(file: file, to: format)
         
         // THEN
-        wait(for: [expectation], timeout: 30)
+        wait(for: [conversionExpectation], timeout: 30)
     }
     
     func testConvertFiles() {
@@ -41,7 +42,7 @@ final class ConvertorTests: XCTestCase {
         let filePaths = fileNames.map { Path($0 + ".shapr") }
         let files = filePaths.map { File<Data>(path: $0) }
         let format: Convertor.OutputFormat = .obj
-        expectation.expectedFulfillmentCount = files.count
+        conversionExpectation.expectedFulfillmentCount = files.count
         
         // WHEN
         for file in files {
@@ -50,19 +51,43 @@ final class ConvertorTests: XCTestCase {
         }
         
         // THEN
-        wait(for: [expectation], timeout: 30)
+        wait(for: [conversionExpectation], timeout: 30)
     }
     
     func testFailConvertFile() {
-        // TODO: test convert file
+        // GIVEN
+        let fileName = "test"
+        let filePath = Path(fileName + ".shaper")
+        let file = File<Data>(path: filePath)
+        let format: Convertor.OutputFormat = .obj
+        
+        // THEN
+        XCTAssertThrowsError(try self.convertor.convert(file: file, to: format))
     }
     
     func testFailConvertFiles() {
-        // TODO: test convert file
+        // GIVEN
+        let fileNames = ["test.shapr", "no.shaper", "test.shapr", "me"]
+        let filePaths = fileNames.map { Path($0) }
+        let files = filePaths.map { File<Data>(path: $0) }
+        let format: Convertor.OutputFormat = .obj
+        
+        // THEN
+        XCTAssertThrowsError(try self.convertor.convert(files: files, to: format))
     }
     
     func testProgressUpdate() {
+        // GIVEN
+        let fileName = "test"
+        let filePath = Path(fileName + ".shapr")
+        let file = File<Data>(path: filePath)
+        let format: Convertor.OutputFormat = .obj
         
+        // WHEN
+        try! self.convertor.convert(file: file, to: format)
+        
+        // THEN
+        wait(for: [progressExpectation], timeout: 30)
     }
 
     static var allTests = [
@@ -78,12 +103,13 @@ final class ConvertorTests: XCTestCase {
 extension ConvertorTests: ConversionDelegate {
     func didUpdateProgress(of file: File<Data>, to value: Double) {
         print("Progress of file '\(file.name)':  \(value)% ...")
+        progressExpectation.fulfill()
     }
     
     func didConvert(file: File<Data>, to convertedFile: File<Data>) {
         if let format = activeConversions[file.name] {
             XCTAssertEqual(format.rawValue, convertedFile.pathExtension)
-            expectation.fulfill()
+            conversionExpectation.fulfill()
         }
     }
 }
