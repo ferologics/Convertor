@@ -23,6 +23,10 @@ public class Convertor {
         self.delegate = delegate
     }
     
+    deinit {
+        operationQueue.operations.forEach { $0.cancel() }
+    }
+    
     // MARK: - Public API
     
     public func convert(file: File<Data>, to format: OutputFormat) throws {
@@ -66,7 +70,6 @@ extension Convertor {
 extension Convertor {
     enum Error: Swift.Error {
         case invalidInputFormat(of: File<Data>)
-        case conversionAlreadyInProgress(of: File<Data>)
     }
 }
 
@@ -75,4 +78,5 @@ extension Convertor {
 public protocol ConversionDelegate {
     func didConvert(file: File<Data>, to convertedFile: File<Data>)
     func didUpdateProgress(of file: File<Data>, to value: Double)
+    func didCancelConversion(of file: File<Data>)
 }

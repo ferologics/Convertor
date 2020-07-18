@@ -26,7 +26,7 @@ final class ConversionOperation: Operation {
         self.outputFormat = outputFormat
     }
     
-    // MARK: - Operation
+    // MARK: - Operation API
     
     override func start() {
         // set up state
@@ -48,6 +48,12 @@ final class ConversionOperation: Operation {
         
         RunLoop.current.run()
     }
+    
+    override func cancel() {
+        delegate?.didCancelConversion(of: file)
+    }
+    
+    // MARK: - Helpers
     
     private func finishConversion() {
         let convertedFile = File<Data>(path: file.path)
