@@ -10,19 +10,12 @@ final class ConvertorTests: XCTestCase {
     
     private lazy var convertor = Convertor(delegate: self)
     private var activeConversions: [String:Convertor.OutputFormat] = [:]
-    private let queue = DispatchQueue(label: "ConversionTestQueue", attributes: .concurrent)
-    private lazy var lock = pthread_rwlock_t()
     private lazy var expectation = XCTestExpectation()
     
     // MARK: Life cycle
     
-    override func setUpWithError() throws {
-        pthread_rwlock_init(&lock, nil)
-    }
-    
     override func tearDownWithError() throws {
         activeConversions = [:]
-        pthread_rwlock_destroy(&lock)
     }
     
     // MARK: - Tests
@@ -36,9 +29,7 @@ final class ConvertorTests: XCTestCase {
         
         // WHEN
         self.activeConversions[file.name] = format
-        queue.async {
-            try! self.convertor.convert(file: file, to: format)
-        }
+        try! self.convertor.convert(file: file, to: format)
         
         // THEN
         wait(for: [expectation], timeout: 30)
@@ -55,9 +46,7 @@ final class ConvertorTests: XCTestCase {
         // WHEN
         for file in files {
             self.activeConversions[file.name] = format
-            queue.async {
-                try! self.convertor.convert(file: file, to: format)
-            }
+            try! self.convertor.convert(file: file, to: format)
         }
         
         // THEN
@@ -92,17 +81,9 @@ extension ConvertorTests: ConversionDelegate {
     }
     
     func didConvert(file: File<Data>, to convertedFile: File<Data>) {
-        pthread_rwlock_tryrdlock(&lock)
         if let format = activeConversions[file.name] {
-            pthread_rwlock_unlock(&lock)
             XCTAssertEqual(format.rawValue, convertedFile.pathExtension)
             expectation.fulfill()
-        } else {
-            pthread_rwlock_unlock(&lock)
         }
-    }
-    
-    func didFailToConvert(file: File<Data>, with error: Error) {
-        
     }
 }
