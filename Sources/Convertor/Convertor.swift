@@ -68,7 +68,7 @@ extension Convertor {
 
 @available(iOS 10.0, *)
 extension Convertor {
-    enum Error: Swift.Error {
+    public enum Error: Swift.Error {
         case invalidInputFormat(of: File<Data>)
     }
 }
