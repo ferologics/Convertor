@@ -29,19 +29,21 @@ final class ConversionOperation: Operation {
     // MARK: - Operation API
     
     override func start() {
-        // set up state
+        
+        // *** set up state ***
+        
         var progress = 0
         let duration = Int.random(in: 5...25)
-        // schedule timer
+        
+        // *** schedule timer ***
+        
         _ = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
             progress += 1
             if progress == duration {
-                // complete conversion
                 timer.invalidate()
                 self.finishConversion()
             } else {
-                // update progress
-                let value = Double(progress)/Double(duration)
+                let value = Float(progress)/Float(duration)
                 self.delegate?.didUpdateProgress(of: self.file, to: value)
             }
         }

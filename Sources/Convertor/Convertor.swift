@@ -76,7 +76,7 @@ extension Convertor {
     }
 }
 
-// MARK: - Error handling
+// MARK: - Error Handling
 
 @available(iOS 10.0, *)
 extension Convertor {
@@ -89,6 +89,6 @@ extension Convertor {
 
 public protocol ConversionDelegate {
     func didConvert(file: File<Data>, to convertedFile: File<Data>)
-    func didUpdateProgress(of file: File<Data>, to value: Double)
+    func didUpdateProgress(of file: File<Data>, to value: Float)
     func didCancelConversion(of file: File<Data>)
 }
