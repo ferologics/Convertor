@@ -61,6 +61,20 @@ extension Convertor {
     
     public enum OutputFormat: String {
         case step, stl, obj
+        
+        public static let allCases: Set<String> = [
+            OutputFormat.step.rawValue,
+            OutputFormat.stl.rawValue,
+            OutputFormat.obj.rawValue
+        ]
+        
+        public var description: String {
+            switch self {
+            case .step: return "STEP-File"
+            case .stl: return "Standard Triangle Language"
+            case .obj: return "3D Model Format"
+            }
+        }
     }
 }
 
