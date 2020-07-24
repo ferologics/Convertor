@@ -89,6 +89,6 @@ extension Convertor {
 
 public protocol ConversionDelegate {
     func didConvert(file: File<Data>, to convertedFile: File<Data>)
-    func didUpdateProgress(of file: File<Data>, to value: Float)
+    func didUpdateProgress(of file: File<Data>, with outputFormat: Convertor.OutputFormat, to value: Float)
     func didCancelConversion(of file: File<Data>)
 }

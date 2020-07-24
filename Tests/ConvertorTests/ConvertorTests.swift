@@ -143,7 +143,7 @@ final class ConvertorTests: XCTestCase {
 
 @available(iOS 10.0, *)
 extension ConvertorTests: ConversionDelegate {
-    func didUpdateProgress(of file: File<Data>, to value: Float) {
+    func didUpdateProgress(of file: File<Data>, with outputFormat: Convertor.OutputFormat, to value: Float) {
         print("Progress of file '\(file.name)':  \(value)% ...")
         progressExpectation.fulfill()
     }

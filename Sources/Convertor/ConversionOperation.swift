@@ -44,7 +44,11 @@ final class ConversionOperation: Operation {
                 self.finishConversion()
             } else {
                 let value = Float(progress)/Float(duration)
-                self.delegate?.didUpdateProgress(of: self.file, to: value)
+                self.delegate?.didUpdateProgress(
+                    of: self.file,
+                    with: self.outputFormat,
+                    to: value
+                )
             }
         }
         
