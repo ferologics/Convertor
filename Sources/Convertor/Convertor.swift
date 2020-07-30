@@ -1,3 +1,10 @@
+//
+//  ConversionToken.swift
+//
+//  Convertor
+//  Created by Frantisek Hetes on 28/07/2020.
+//
+
 import FileKit
 import Foundation
 
@@ -29,25 +36,25 @@ public class Convertor {
     
     // MARK: - Public API
     
-    public func convert(file: File<Data>, to format: OutputFormat) throws {
+    @discardableResult public func convert(file: File<Data>, to format: OutputFormat) throws -> ConversionToken {
         guard file.pathExtension == InputFormat.shapr.rawValue else {
             throw Error.invalidInputFormat(of: file)
         }
         
-        internalConvert(file: file, to: format)
+        return internalConvert(file: file, to: format)
     }
     
-    public func convert(files: [File<Data>], to format: OutputFormat) throws {
-        for file in files {
-            try convert(file: file, to: format)
-        }
+    public func convert(files: [File<Data>], to format: OutputFormat) throws -> [ConversionToken] {
+        try files.map { try convert(file: $0, to: format) }
     }
     
     // MARK: - Internal API
     
-    func internalConvert(file: File<Data>, to format: OutputFormat) {
+    func internalConvert(file: File<Data>, to format: OutputFormat) -> ConversionToken {
         let operation = ConversionOperation(delegate: delegate, file: file, outputFormat: format)
+        operation.name = file.name + format.rawValue
         operationQueue.addOperation(operation)
+        return .init(with: operation)
     }
 }
 
@@ -90,5 +97,5 @@ extension Convertor {
 public protocol ConversionDelegate {
     func didConvert(file: File<Data>, to convertedFile: File<Data>)
     func didUpdateProgress(of file: File<Data>, with outputFormat: Convertor.OutputFormat, to value: Float)
-    func didCancelConversion(of file: File<Data>)
+    func didCancelConversion(of file: File<Data>, to outputFormat: Convertor.OutputFormat)
 }

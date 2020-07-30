@@ -1,7 +1,7 @@
 //
 //  File.swift
 //  
-//
+//  Convertor
 //  Created by Frantisek Hetes on 18/07/2020.
 //
 
@@ -56,7 +56,7 @@ final class ConversionOperation: Operation {
     }
     
     override func cancel() {
-        delegate?.didCancelConversion(of: file)
+        delegate?.didCancelConversion(of: file, to: outputFormat)
     }
     
     // MARK: - Helpers

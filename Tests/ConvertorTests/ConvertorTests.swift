@@ -100,16 +100,30 @@ final class ConvertorTests: XCTestCase {
         
         // WHEN
         self.activeConversions[file.name] = format
+        let token = try self.convertor.convert(file: file, to: format)
+        
+        // THEN
+        after(.seconds(5), token.cancel)
+        wait(for: [conversionExpectation], timeout: 30)
+    }
+    
+    func testFileConversionCancelOnDeinit() throws {
+        // GIVEN
+        let fileName = "test"
+        let filePath = Path(fileName + ".shapr")
+        let file = File<Data>(path: filePath)
+        let format: Convertor.OutputFormat = .obj
+        
+        // WHEN
+        self.activeConversions[file.name] = format
         try self.convertor.convert(file: file, to: format)
         
         // THEN
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) {
-            self.convertor = Convertor(delegate: self)
-        }
+        after(.seconds(5)) { self.convertor = Convertor(delegate: self) }
         wait(for: [cancelExpecatation], timeout: 10)
     }
     
-    func testFilesConversionCancel() throws {
+    func testFilesConversionCancelOnDeinit() throws {
         // GIVEN
         let fileNames = ["test", "no", "test", "me"]
         let filePaths = fileNames.map { Path($0 + ".shapr") }
@@ -124,9 +138,7 @@ final class ConvertorTests: XCTestCase {
         }
         
         // THEN
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) {
-            self.convertor = Convertor(delegate: self)
-        }
+        after(.seconds(5)) { self.convertor = Convertor(delegate: self) }
         wait(for: [cancelExpecatation], timeout: 10)
     }
 
@@ -137,7 +149,8 @@ final class ConvertorTests: XCTestCase {
         ("testFailConvertFiles", testFailConvertFiles),
         ("testProgressUpdate", testProgressUpdate),
         ("testFileConversionCancel", testFileConversionCancel),
-        ("testFilesConversionCancel", testFilesConversionCancel),
+        ("testFileConversionCancelOnDeinit", testFileConversionCancelOnDeinit),
+        ("testFilesConversionCancelOnDeinit", testFilesConversionCancelOnDeinit),
     ]
 }
 
@@ -155,7 +168,15 @@ extension ConvertorTests: ConversionDelegate {
         }
     }
     
-    func didCancelConversion(of file: File<Data>) {
+    func didCancelConversion(of file: File<Data>, to outputFormat: Convertor.OutputFormat) {
         cancelExpecatation.fulfill()
+    }
+}
+
+// MARK: - Helpers
+
+private extension ConvertorTests {
+    private func after(_ delay: DispatchTimeInterval, _ closure: @escaping () -> Void) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: closure)
     }
 }
